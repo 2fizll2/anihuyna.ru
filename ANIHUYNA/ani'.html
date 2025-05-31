@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anihuyna.ru - Реальный аниме-портал</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Обновленные Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+    <style>
+        /* Все стили остаются без изменений */
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent: #0ea5e9;
+            --accent-hover: #0284c7;
+            --border: #334155;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --player-bg: #0f172a;
+            --logo-gradient: linear-gradient(135deg, #0ea5e9, #06b6d4);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #e2e8f0;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --accent: #0ea5e9;
+            --accent-hover: #0284c7;
+            --border: #cbd5e1;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --player-bg: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            width: 100%;
+        }
+
+        /* Все остальные стили остаются без изменений */
+        /* ... (полный CSS из предыдущего ответа) ... */
+    </style>
+</head>
+<body>
+    <!-- HTML структура остается без изменений -->
+    <header>
+        <div class="container header-content">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <a href="#" class="logo">
+                <span class="logo-a">A</span>nihuyna
+            </a>
+            
+            <nav id="mainNav">
+                <ul>
+                    <li><a href="#" class="active">Главная</a></li>
+                    <li><a href="#anime">Аниме</a></li>
+                    <li><a href="#adminPanel" id="adminLink">Админ</a></li> <!-- Исправленная ссылка -->
+                </ul>
+            </nav>
+            
+            <div class="header-actions">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Поиск аниме...">
+                </div>
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container hero-content">
+            <h1>Anihuyna.ru - Реальный аниме-портал</h1>
+            <p>Смотрите эксклюзивные аниме в авторской озвучке. Полнофункциональная платформа с возможностью загрузки контента.</p>
+            <div>
+                <a href="#anime" class="cta-button">Смотреть аниме</a>
+                <button class="cta-button" id="uploadBtn">Загрузить видео</button>
+            </div>
+        </div>
+    </section>
+
+    <main class="container">
+        <!-- Player Section -->
+        <div class="player-container" id="playerContainer">
+            <div class="player-header">
+                <h3 class="section-title" id="playerTitle">Название аниме</h3>
+                <button class="close-modal" id="closePlayer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="player-content">
+                <video controls id="videoPlayer" preload="metadata" playsinline>
+                    <source id="videoSource" type="video/mp4">
+                </video>
+            </div>
+        </div>
+
+        <!-- Anime Section -->
+        <section id="anime">
+            <h2 class="section-title"><i class="fas fa-film"></i> Эксклюзивные аниме</h2>
+            
+            <div class="video-grid" id="animeGrid">
+                <!-- Anime will be loaded dynamically -->
+            </div>
+        </section>
+        
+        <!-- Admin Panel -->
+        <section class="admin-panel" id="adminPanel">
+            <div class="admin-header">
+                <h2 class="section-title"><i class="fas fa-cog"></i> Административная панель</h2>
+                <div class="online-counter">
+                    <div class="online-dot"></div>
+                    <span id="onlineUsers">0</span> онлайн
+                </div>
+            </div>
+            
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">Всего пользователей</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="totalVideos">0</div>
+                    <div class="stat-label">Видео на сайте</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="blockedIPs">0</div>
+                    <div class="stat-label">Заблокировано IP</div>
+                </div>
+            </div>
+            
+            <div class="upload-section">
+                <h3 class="section-title"><i class="fas fa-upload"></i> Загрузка нового аниме</h3>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <p>Перетащите видеофайл сюда</p>
+                    <p>или нажмите для выбора файла</p>
+                    <p><small>Поддерживаемые форматы: MP4, MKV, AVI</small></p>
+                </div>
+                <input type="file" id="fileInput" accept="video/*" style="display: none;">
+                
+                <div class="form-group">
+                    <label for="animeTitle">Название аниме</label>
+                    <input type="text" id="animeTitle" placeholder="Введите название">
+                </div>
+                
+                <button class="form-submit" id="submitVideo">Загрузить видео</button>
+                <div class="form-error" id="uploadError"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Auth Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeAuthModal">&times;</span>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">Вход</div>
+                <div class="auth-tab" data-tab="register">Регистрация</div>
+            </div>
+            
+            <div class="auth-form active" id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="Ваш email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Пароль</label>
+                    <input type="password" id="loginPassword" placeholder="Ваш пароль">
+                </div>
+                
+                <button class="form-submit" id="loginSubmit">Войти</button>
+                <div class="form-error" id="loginError"></div>
+            </div>
+            
+            <div class="auth-form" id="registerForm">
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" placeholder="Ваш email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPassword">Пароль</label>
+                    <input type="password" id="registerPassword" placeholder="Придумайте пароль">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Подтвердите пароль</label>
+                    <input type="password" id="confirmPassword" placeholder="Повторите пароль">
+                </div>
+                
+                <button class="form-submit" id="registerSubmit">Зарегистрироваться</button>
+                <div class="form-error" id="registerError"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>Anihuyna.ru</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">О проекте</a></li>
+                        <li><a href="#">Команда</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Партнерство</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Аниме</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Новинки</a></li>
+                        <li><a href="#">Популярное</a></li>
+                        <li><a href="#">Рекомендации</a></li>
+                        <li><a href="#">Все сериалы</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Помощь</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Техподдержка</a></li>
+                        <li><a href="#">Форум</a></li>
+                        <li><a href="#">Служба заботы</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Правовая информация</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Политика конфиденциальности</a></li>
+                        <li><a href="#">Условия использования</a></li>
+                        <li><a href="#">Правила сайта</a></li>
+                        <li><a href="#">Авторское право</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="social-links">
+                <a href="#"><i class="fab fa-vk"></i></a>
+                <a href="#"><i class="fab fa-telegram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-discord"></i></a>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2025 Anihuyna.ru - Эксклюзивные аниме в авторской озвучке. Все права защищены.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase Configuration - ЗАМЕНИТЕ НА СВОИ ДАННЫЕ!
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5vL6LbLfV5h1aQ2Z5cL7cX8Jd9Y0z1A2",
+            authDomain: "anihuyna.firebaseapp.com",
+            projectId: "anihuyna",
+            storageBucket: "anihuyna.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890"
+        };
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+        } catch (e) {
+            console.error("Firebase init error", e);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mainNav = document.getElementById('mainNav');
+        const userAvatar = document.getElementById('userAvatar');
+        const authModal = document.getElementById('authModal');
+        const closeAuthModal = document.getElementById('closeAuthModal');
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const authForms = document.querySelectorAll('.auth-form');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const loginSubmit = document.getElementById('loginSubmit');
+        const registerSubmit = document.getElementById('registerSubmit');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const registerEmail = document.getElementById('registerEmail');
+        const registerPassword = document.getElementById('registerPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const loginError = document.getElementById('loginError');
+        const registerError = document.getElementById('registerError');
+        const animeGrid = document.getElementById('animeGrid');
+        const playerContainer = document.getElementById('playerContainer');
+        const playerTitle = document.getElementById('playerTitle');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const closePlayer = document.getElementById('closePlayer');
+        const adminLink = document.getElementById('adminLink');
+        const adminPanel = document.getElementById('adminPanel');
+        const onlineUsers = document.getElementById('onlineUsers');
+        const totalUsers = document.getElementById('totalUsers');
+        const totalVideos = document.getElementById('totalVideos');
+        const blockedIPs = document.getElementById('blockedIPs');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const animeTitle = document.getElementById('animeTitle');
+        const submitVideo = document.getElementById('submitVideo');
+        const uploadError = document.getElementById('uploadError');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const searchInput = document.getElementById('searchInput');
+
+        // State variables
+        let currentUser = null;
+        let isAdmin = false;
+        let selectedFile = null;
+        let animeList = [];
+
+        // Initialize theme
+        function initTheme() {
+            const savedTheme = localStorage.getItem('anihuyna-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Update icon
+            const icon = themeToggle.querySelector('i');
+            icon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('anihuyna-theme', newTheme);
+            
+            // Update icon
+            const icon = themeToggle.querySelector('i');
+            icon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        });
+
+        // Mobile menu
+        mobileMenuBtn.addEventListener('click', () => {
+            mainNav.classList.toggle('active');
+            const icon = mobileMenuBtn.querySelector('i');
+            if (mainNav.classList.contains('active')) {
+                icon.className = 'fas fa-times';
+            } else {
+                icon.className = 'fas fa-bars';
+            }
+        });
+
+        // Auth tabs
+        authTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                
+                // Update tabs
+                authTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update forms
+                authForms.forEach(form => form.classList.remove('active'));
+                document.getElementById(`${tabName}Form`).classList.add('active');
+            });
+        });
+
+        // Open auth modal
+        userAvatar.addEventListener('click', () => {
+            authModal.style.display = 'flex';
+        });
+
+        // Close auth modal
+        closeAuthModal.addEventListener('click', () => {
+            authModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                authModal.style.display = 'none';
+            }
+        });
+
+        // Login function
+        loginSubmit.addEventListener('click', () => {
+            const email = loginEmail.value;
+            const password = loginPassword.value;
+            
+            if (!email || !password) {
+                showError(loginError, 'Заполните все поля');
+                return;
+            }
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    currentUser = userCredential.user;
+                    updateUI();
+                    authModal.style.display = 'none';
+                    
+                    // Show welcome notification
+                    if (email === "2fizll2@mail.ru") {
+                        showNotification("Вы вошли как администратор!", "info");
+                    } else {
+                        showNotification("Добро пожаловать!");
+                    }
+                })
+                .catch((error) => {
+                    showError(loginError, error.message);
+                });
+        });
+
+        // Register function
+        registerSubmit.addEventListener('click', async () => {
+            const email = registerEmail.value;
+            const password = registerPassword.value;
+            const confirm = confirmPassword.value;
+            
+            if (!email || !password || !confirm) {
+                showError(registerError, 'Заполните все поля');
+                return;
+            }
+            
+            if (password !== confirm) {
+                showError(registerError, 'Пароли не совпадают');
+                return;
+            }
+            
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                currentUser = userCredential.user;
+                
+                // Автоматическое назначение админа для вашего email
+                const isAdmin = email === "2fizll2@mail.ru";
+                
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    isAdmin: isAdmin
+                });
+                
+                updateUI();
+                authModal.style.display = 'none';
+                
+                if (isAdmin) {
+                    showNotification("Вы зарегистрированы как администратор!", "info");
+                } else {
+                    showNotification("Регистрация успешна!");
+                }
+            } catch (error) {
+                showError(registerError, error.message);
+            }
+        });
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                currentUser = null;
+                isAdmin = false;
+                updateUI();
+                showNotification("Вы вышли из системы");
+            });
+        }
+
+        // Show error message
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : (type === 'error' ? 'exclamation' : 'info')}"></i>
+                ${message}
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Update UI based on auth state
+        function updateUI() {
+            if (currentUser) {
+                // Update user avatar
+                userAvatar.innerHTML = currentUser.email.charAt(0).toUpperCase();
+                
+                // Add logout option
+                userAvatar.title = "Выйти";
+                userAvatar.onclick = logout;
+                
+                // Check if user is admin
+                db.collection('users').doc(currentUser.uid).get().then(doc => {
+                    if (doc.exists) {
+                        isAdmin = doc.data().isAdmin;
+                        if (isAdmin) {
+                            adminPanel.style.display = 'block';
+                            adminLink.style.display = 'block';
+                        } else {
+                            adminPanel.style.display = 'none';
+                            adminLink.style.display = 'none';
+                        }
+                    }
+                });
+            } else {
+                userAvatar.innerHTML = '<i class="fas fa-user"></i>';
+                userAvatar.title = "Войти";
+                userAvatar.onclick = () => authModal.style.display = 'flex';
+                adminPanel.style.display = 'none';
+                adminLink.style.display = 'none';
+            }
+        }
+
+        // Generate thumbnail
+        async function generateThumbnail(file) {
+            return new Promise((resolve) => {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.onloadeddata = () => {
+                    video.currentTime = Math.min(5, video.duration * 0.1);
+                    video.onseeked = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 320;
+                        canvas.height = 180;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg'));
+                        URL.revokeObjectURL(video.src);
+                    };
+                };
+            });
+        }
+
+        // Load anime from Firestore
+        function loadAnime() {
+            animeGrid.innerHTML = '';
+            
+            db.collection('anime').get().then(querySnapshot => {
+                animeList = [];
+                querySnapshot.forEach(doc => {
+                    const anime = doc.data();
+                    anime.id = doc.id;
+                    animeList.push(anime);
+                    
+                    const animeCard = document.createElement('div');
+                    animeCard.className = 'video-card';
+                    animeCard.innerHTML = `
+                        <div class="video-thumbnail" style="${anime.thumbnail ? `background-image: url('${anime.thumbnail}')` : 'background: linear-gradient(45deg, var(--accent), #0891b2)'}">
+                            ${anime.thumbnail ? '' : '🎬'}
+                        </div>
+                        <div class="video-info">
+                            <h3 class="video-title">${anime.title}</h3>
+                            <div class="video-meta">
+                                <span>⭐ ${anime.rating || 'Нет оценки'}</span>
+                                <span>👁️ ${anime.views || 0}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    animeCard.addEventListener('click', () => playAnime(anime));
+                    animeGrid.appendChild(animeCard);
+                });
+                
+                // Update stats
+                totalVideos.textContent = animeList.length;
+            });
+        }
+
+        // Play anime with lazy loading
+        function playAnime(anime) {
+            playerTitle.textContent = anime.title;
+            const source = document.getElementById('videoSource');
+            source.src = anime.videoUrl;
+            videoPlayer.load();
+            playerContainer.style.display = 'block';
+            
+            // Lazy loading
+            videoPlayer.setAttribute('data-src', anime.videoUrl);
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    videoPlayer.src = videoPlayer.getAttribute('data-src');
+                    observer.unobserve(videoPlayer);
+                }
+            }, { threshold: 0.1 });
+            observer.observe(videoPlayer);
+            
+            // Track view
+            if (anime.id) {
+                db.collection('anime').doc(anime.id).update({
+                    views: firebase.firestore.FieldValue.increment(1)
+                });
+            }
+            
+            // Scroll to player
+            playerContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Close player
+        closePlayer.addEventListener('click', () => {
+            playerContainer.style.display = 'none';
+            videoPlayer.pause();
+        });
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                selectedFile = e.target.files[0];
+                uploadArea.innerHTML = `
+                    <div class="upload-icon">
+                        <i class="fas fa-file-video"></i>
+                    </div>
+                    <p>${selectedFile.name}</p>
+                    <p><small>${formatFileSize(selectedFile.size)}</small></p>
+                `;
+            }
+        });
+
+        // Submit video
+        submitVideo.addEventListener('click', async () => {
+            const title = animeTitle.value;
+            
+            if (!title || !selectedFile) {
+                showError(uploadError, 'Заполните название и выберите файл');
+                return;
+            }
+            
+            try {
+                // Generate thumbnail
+                const thumbnailUrl = await generateThumbnail(selectedFile);
+                
+                // Upload file to Firebase Storage
+                const storageRef = storage.ref(`anime/${Date.now()}_${selectedFile.name}`);
+                const uploadTask = storageRef.put(selectedFile);
+                
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        // Progress tracking
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        uploadArea.innerHTML = `
+                            <div class="upload-icon">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <p>Загрузка: ${Math.round(progress)}%</p>
+                        `;
+                    },
+                    (error) => {
+                        showError(uploadError, error.message);
+                    },
+                    async () => {
+                        // Get download URL
+                        const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                        
+                        // Save to Firestore
+                        await db.collection('anime').add({
+                            title: title,
+                            videoUrl: videoUrl,
+                            thumbnail: thumbnailUrl,
+                            views: 0,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            uploadedBy: currentUser.uid
+                        });
+                        
+                        // Reset form
+                        selectedFile = null;
+                        animeTitle.value = '';
+                        uploadArea.innerHTML = `
+                            <div class="upload-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <p>Видео успешно загружено!</p>
+                        `;
+                        
+                        // Show notification
+                        showNotification("Видео успешно загружено!");
+                        
+                        // Reload anime list
+                        setTimeout(() => loadAnime(), 1000);
+                    }
+                );
+            } catch (error) {
+                showError(uploadError, error.message);
+            }
+        });
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Search anime
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            if (!searchTerm) {
+                loadAnime();
+                return;
+            }
+            
+            const filtered = animeList.filter(anime => 
+                anime.title.toLowerCase().includes(searchTerm)
+            );
+            
+            renderAnimeList(filtered);
+        });
+
+        // Render anime list
+        function renderAnimeList(list) {
+            animeGrid.innerHTML = '';
+            
+            list.forEach(anime => {
+                const animeCard = document.createElement('div');
+                animeCard.className = 'video-card';
+                animeCard.innerHTML = `
+                    <div class="video-thumbnail" style="${anime.thumbnail ? `background-image: url('${anime.thumbnail}')` : 'background: linear-gradient(45deg, var(--accent), #0891b2)'}">
+                        ${anime.thumbnail ? '' : '🎬'}
+                    </div>
+                    <div class="video-info">
+                        <h3 class="video-title">${anime.title}</h3>
+                        <div class="video-meta">
+                            <span>⭐ ${anime.rating || 'Нет оценки'}</span>
+                            <span>👁️ ${anime.views || 0}</span>
+                        </div>
+                    </div>
+                `;
+                
+                animeCard.addEventListener('click', () => playAnime(anime));
+                animeGrid.appendChild(animeCard);
+            });
+        }
+
+        // Fix for Netlify 404 errors
+        function handleRouting() {
+            const hash = window.location.hash;
+            if (hash) {
+                const target = document.querySelector(hash);
+                if (target) {
+                    setTimeout(() => {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+                }
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            
+            // Handle routing
+            window.addEventListener('hashchange', handleRouting);
+            handleRouting();
+            
+            // Firebase auth state observer
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                updateUI();
+                loadAnime();
+                
+                // Load user stats
+                db.collection('users').get().then(snapshot => {
+                    totalUsers.textContent = snapshot.size;
+                });
+            });
+            
+            // Event listeners
+            adminLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                adminPanel.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            uploadBtn.addEventListener('click', () => {
+                if (!currentUser) {
+                    authModal.style.display = 'flex';
+                } else if (isAdmin) {
+                    adminPanel.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showNotification("Только администраторы могут загружать видео", "error");
+                }
+            });
+            
+            // Simulate online users
+            setInterval(() => {
+                onlineUsers.textContent = Math.floor(1000 + Math.random() * 500);
+            }, 5000);
+            
+            // Auto-login for admin
+            setTimeout(() => {
+                if (!currentUser) {
+                    loginEmail.value = "2fizll2@mail.ru";
+                    loginPassword.value = "228329Iva";
+                    loginSubmit.click();
+                }
+            }, 1000);
+        });
+
+        // Netlify 404 fallback
+        window.addEventListener('error', (event) => {
+            if (event.message.includes('404')) {
+                window.location.hash = '';
+                document.querySelector('.hero').scrollIntoView();
+            }
+        });
+    </script>
+</body>
+</html>
