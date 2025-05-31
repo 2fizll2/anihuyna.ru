@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anihuyna - Смотреть аниме онлайн</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+<body>
+    <!-- Шапка сайта -->
+    <header>
+        <a href="#" class="logo">
+            <div class="logo-a">A</div>
+            nihuyna
+        </a>
+        
+        <div class="nav-links">
+            <a href="#"><i class="fas fa-home"></i> Главная</a>
+            <a href="#"><i class="fas fa-film"></i> Аниме</a>
+            <a href="#"><i class="fas fa-newspaper"></i> Новости</a>
+            <a href="#"><i class="fas fa-comments"></i> Сообщество</a>
+        </div>
+        
+        <div class="user-actions">
+            <button class="btn btn-login" id="loginBtn">Войти</button>
+            <button class="btn btn-register" id="registerBtn">Регистрация</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Герой секция -->
+        <section class="hero">
+            <h1>Смотри аниме онлайн</h1>
+            <p>Лучшая коллекция аниме с качественной озвучкой Anihuyna. Новые серии, популярные тайтлы и эксклюзивные релизы только у нас!</p>
+        </section>
+
+        <!-- Видеоплеер -->
+        <section class="video-player-section">
+            <h2 class="section-title"><i class="fas fa-play-circle"></i> Сейчас воспроизводится</h2>
+            <div class="video-container">
+                <video id="mainPlayer" controls>
+                    <source src="videos/placeholder.mp4" type="video/mp4">
+                    Ваш браузер не поддерживает видео тег.
+                </video>
+            </div>
+            <div class="video-info">
+                <div class="video-title">Наруто: Ураганные хроники - Серия 215</div>
+                <div class="video-actions">
+                    <button class="action-btn"><i class="fas fa-thumbs-up"></i> <span>245</span></button>
+                    <button class="action-btn"><i class="fas fa-thumbs-down"></i> <span>12</span></button>
+                    <button class="action-btn"><i class="fas fa-bookmark"></i> В закладки</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Новости -->
+        <section class="news-section">
+            <h2 class="section-title"><i class="fas fa-newspaper"></i> Последние новости</h2>
+            <div class="news-grid" id="newsContainer">
+                <!-- Новости будут загружены через JS -->
+            </div>
+            <div class="admin-actions" id="adminActions">
+                <button class="btn btn-register"><i class="fas fa-plus"></i> Добавить новость</button>
+            </div>
+        </section>
+
+        <!-- Комментарии -->
+        <section class="comments-section">
+            <h2 class="section-title"><i class="fas fa-comments"></i> Комментарии</h2>
+            <div class="comment-form" id="commentForm">
+                <textarea placeholder="Напишите ваш комментарий..." disabled></textarea>
+                <button class="btn btn-register" disabled>Отправить</button>
+            </div>
+            <div class="comments-list" id="commentsContainer">
+                <!-- Комментарии будут загружены через JS -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Форма входа -->
+    <div class="auth-modal" id="loginModal">
+        <div class="auth-content">
+            <span class="close-btn">&times;</span>
+            <h2>Вход в аккаунт</h2>
+            <form id="loginFormElement">
+                <div class="form-group">
+                    <label for="email">Электронная почта</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="form-submit">Войти</button>
+            </form>
+            <div class="form-footer">
+                Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Форма регистрации -->
+    <div class="auth-modal" id="registerModal">
+        <div class="auth-content">
+            <span class="close-btn">&times;</span>
+            <h2>Регистрация</h2>
+            <form id="registerFormElement">
+                <div class="form-group">
+                    <label for="regEmail">Электронная почта</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Пароль</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Подтвердите пароль</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="form-submit">Зарегистрироваться</button>
+            </form>
+            <div class="form-footer">
+                Уже есть аккаунт? <a href="#" id="showLogin">Войти</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/video-player.js"></script>
+</body>
+</html>

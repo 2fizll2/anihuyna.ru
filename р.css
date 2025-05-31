@@ -1,0 +1,131 @@
+:root {
+    --primary: #00c6c3;
+    --primary-dark: #00a8a6;
+    --secondary: #1a1a2e;
+    --secondary-light: #2a2a3c;
+    --accent: #ff6b6b;
+    --light: #f0f8ff;
+    --dark: #0d0d1a;
+    --gray: #6c757d;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--secondary);
+    color: var(--light);
+    overflow-x: hidden;
+    background-image: linear-gradient(to bottom right, #0d0d1a, #1a1a2e);
+    min-height: 100vh;
+}
+
+/* Шапка сайта */
+header {
+    background-color: rgba(13, 13, 26, 0.95);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 198, 195, 0.2);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--light);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.logo:hover {
+    transform: translateY(-3px);
+    text-shadow: 0 5px 15px rgba(0, 198, 195, 0.4);
+}
+
+.logo-a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    border-radius: 50%;
+    margin-right: 10px;
+    color: var(--dark);
+    font-weight: bold;
+    font-size: 2.5rem;
+    box-shadow: 0 0 15px rgba(0, 198, 195, 0.5);
+    transition: all 0.3s ease;
+}
+
+.logo:hover .logo-a {
+    transform: rotate(15deg);
+    box-shadow: 0 0 25px rgba(0, 198, 195, 0.8);
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
+    color: var(--light);
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+    font-weight: 500;
+    position: relative;
+    padding: 5px 0;
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+.nav-links a:hover {
+    color: var(--primary);
+}
+
+.user-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+}
+
+.btn:focus {
+    box-shadow: 0

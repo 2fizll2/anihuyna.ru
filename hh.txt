@@ -1,0 +1,16 @@
+anihuyna-website/
+├── index.html
+├── css/
+│   ├── style.css
+│   ├── auth.css
+│   └── responsive.css
+├── js/
+│   ├── main.js
+│   ├── auth.js
+│   └── video-player.js
+├── images/
+│   ├── logo.png
+│   ├── hero-bg.jpg
+│   └── default-avatar.png
+└── videos/
+    └── placeholder.mp4
